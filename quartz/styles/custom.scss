@@ -1,3 +1,98 @@
 @use "./base.scss";
 
-// put your custom CSS here!
+// Geist Sans — local font faces
+@font-face {
+  font-family: "Geist Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/fonts/Geist-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/static/fonts/Geist-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/static/fonts/Geist-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/fonts/Geist-Bold.woff2") format("woff2");
+}
+
+// Geist Mono — local font faces
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/fonts/GeistMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/static/fonts/GeistMono-Medium.woff2") format("woff2");
+}
+
+// Sailplane design overrides
+:root {
+  --headerHeight: 40px;
+  --bodyFontSize: 14px;
+  --radius: 0.625rem;
+}
+
+body {
+  font-size: var(--bodyFontSize);
+}
+
+// Minimal shadows (Sailplane aesthetic)
+.card,
+article {
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.05);
+}
+
+// Sailplane border radius
+.search-bar,
+input,
+button,
+.callout {
+  border-radius: var(--radius);
+}
+
+// Graph node colors by directory
+.graph-outer {
+  // Colors will be applied via the graph component's node coloring logic
+  // which reads from the Quartz theme. These are additional overrides
+  // for Helm-specific directory coloring applied via inline styles
+  // in the graph's data processing.
+}
+
+// Confidential content blocks — subtle visual indicator
+// Matches %% ... %% delimiters in markdown
+.confidential {
+  background: oklch(0.97 0.02 85 / 0.3);
+  border-left: 3px solid oklch(0.75 0.15 85);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+}
+
+[saved-theme="dark"] .confidential {
+  background: oklch(0.269 0.02 85 / 0.3);
+  border-left-color: oklch(0.6 0.15 85);
+}

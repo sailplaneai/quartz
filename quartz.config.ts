@@ -1,54 +1,54 @@
 import { QuartzConfig } from "./quartz/cfg"
 import * as Plugin from "./quartz/plugins"
 
-/**
- * Quartz 4 Configuration
- *
- * See https://quartz.jzhao.xyz/configuration for more information.
- */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Quartz 4",
-    pageTitleSuffix: "",
+    pageTitle: "Helm",
+    pageTitleSuffix: " — Sailplane Knowledge",
     enableSPA: true,
     enablePopovers: true,
-    analytics: {
-      provider: "plausible",
-    },
+    analytics: null,
     locale: "en-US",
-    baseUrl: "quartz.jzhao.xyz",
-    ignorePatterns: ["private", "templates", ".obsidian"],
+    baseUrl: "localhost",
+    ignorePatterns: [
+      ".obsidian",
+      "private",
+      "templates",
+      "ingestion/raw",
+      "dist",
+      "*.dot",
+    ],
     defaultDateType: "modified",
     theme: {
-      fontOrigin: "googleFonts",
-      cdnCaching: true,
+      fontOrigin: "local",
+      cdnCaching: false,
       typography: {
-        header: "Schibsted Grotesk",
-        body: "Source Sans Pro",
-        code: "IBM Plex Mono",
+        header: "Geist Sans",
+        body: "Geist Sans",
+        code: "Geist Mono",
       },
       colors: {
         lightMode: {
-          light: "#faf8f8",
-          lightgray: "#e5e5e5",
-          gray: "#b8b8b8",
-          darkgray: "#4e4e4e",
-          dark: "#2b2b2b",
-          secondary: "#284b63",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
-          textHighlight: "#fff23688",
+          light: "oklch(1 0 0)",
+          lightgray: "oklch(0.922 0 0)",
+          gray: "oklch(0.708 0 0)",
+          darkgray: "oklch(0.556 0 0)",
+          dark: "oklch(0.145 0 0)",
+          secondary: "oklch(0.205 0 0)",
+          tertiary: "oklch(0.556 0 0)",
+          highlight: "oklch(0.97 0 0)",
+          textHighlight: "oklch(0.85 0.15 85 / 0.4)",
         },
         darkMode: {
-          light: "#161618",
-          lightgray: "#393639",
-          gray: "#646464",
-          darkgray: "#d4d4d4",
-          dark: "#ebebec",
-          secondary: "#7b97aa",
-          tertiary: "#84a59d",
-          highlight: "rgba(143, 159, 169, 0.15)",
-          textHighlight: "#b3aa0288",
+          light: "oklch(0.145 0 0)",
+          lightgray: "oklch(0.269 0 0)",
+          gray: "oklch(0.439 0 0)",
+          darkgray: "oklch(0.708 0 0)",
+          dark: "oklch(0.985 0 0)",
+          secondary: "oklch(0.985 0 0)",
+          tertiary: "oklch(0.708 0 0)",
+          highlight: "oklch(0.269 0 0)",
+          textHighlight: "oklch(0.75 0.15 85 / 0.4)",
         },
       },
     },
@@ -81,15 +81,13 @@ const config: QuartzConfig = {
       Plugin.FolderPage(),
       Plugin.TagPage(),
       Plugin.ContentIndex({
-        enableSiteMap: true,
-        enableRSS: true,
+        enableSiteMap: false,
+        enableRSS: false,
       }),
       Plugin.Assets(),
       Plugin.Static(),
       Plugin.Favicon(),
       Plugin.NotFoundPage(),
-      // Comment out CustomOgImages to speed up build time
-      Plugin.CustomOgImages(),
     ],
   },
 }
