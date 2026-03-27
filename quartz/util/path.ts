@@ -237,11 +237,12 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
     let [targetCanonical, targetAnchor] = splitAnchor(canonicalSlug)
 
     if (opts.strategy === "shortest") {
-      // if the file name is unique, then it's just the filename
+      // case-insensitive match: sluggify preserves case but file slugs are lowercase
+      const targetLower = targetCanonical.toLowerCase()
       const matchingFileNames = opts.allSlugs.filter((slug) => {
         const parts = slug.split("/")
         const fileName = parts.at(-1)
-        return targetCanonical === fileName
+        return targetLower === fileName?.toLowerCase()
       })
 
       // only match, just use it
@@ -249,9 +250,37 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
         const targetSlug = matchingFileNames[0]
         return (resolveRelative(src, targetSlug) + targetAnchor) as RelativeURL
       }
+
+      // multiple matches: disambiguate by proximity (longest common path prefix)
+      if (matchingFileNames.length > 1) {
+        const srcParts = src.split("/")
+        const sorted = [...matchingFileNames].sort((a, b) => {
+          const aParts = a.split("/")
+          const bParts = b.split("/")
+          let aCommon = 0
+          let bCommon = 0
+          for (let i = 0; i < Math.min(srcParts.length, aParts.length); i++) {
+            if (srcParts[i] === aParts[i]) aCommon++
+            else break
+          }
+          for (let i = 0; i < Math.min(srcParts.length, bParts.length); i++) {
+            if (srcParts[i] === bParts[i]) bCommon++
+            else break
+          }
+          return bCommon - aCommon
+        })
+        return (resolveRelative(src, sorted[0]) + targetAnchor) as RelativeURL
+      }
+
+      // zero matches: if target has path separators, the author wrote an explicit
+      // relative path — respect it instead of constructing a broken absolute path
+      if (targetCanonical.includes("/")) {
+        return targetSlug as RelativeURL
+      }
     }
 
-    // if it's not unique, then it's the absolute path from the vault root
+    // absolute fallback: bare names (glossary terms, OFM wikilinks) resolve to
+    // root-level paths where redirect pages catch them
     return (joinSegments(pathToRoot(src), canonicalSlug) + folderTail) as RelativeURL
   }
 }
