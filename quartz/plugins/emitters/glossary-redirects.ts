@@ -3,7 +3,7 @@ import { QuartzEmitterPlugin } from "../types"
 import { write } from "./helpers"
 import { slug as slugAnchor } from "github-slugger"
 
-const GLOSSARY_SLUG = "src/glossary" as FullSlug
+const GLOSSARY_SLUG = "glossary" as FullSlug
 
 export const GlossaryRedirects: QuartzEmitterPlugin = () => ({
   name: "GlossaryRedirects",
