@@ -1,6 +1,26 @@
 import { PageLayout, SharedLayout } from "./quartz/cfg"
 import * as Component from "./quartz/components"
 
+const explorerOptions = {
+  mapFn: (node: any) => {
+    if (node.isFolder && node.displayName === "Source Knowledge") {
+      node.displayName = "Source"
+    }
+    return node
+  },
+  sortFn: (a: any, b: any) => {
+    const priority: Record<string, number> = { src: 0, references: 1, harness: 2 }
+    const ap = priority[a.name] ?? 999
+    const bp = priority[b.name] ?? 999
+    if (ap !== bp) return ap - bp
+    if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1
+    return a.displayName.localeCompare(b.displayName, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    })
+  },
+}
+
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
@@ -34,7 +54,7 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer(explorerOptions),
   ],
   right: [
     Component.Graph(),
@@ -57,7 +77,7 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer(explorerOptions),
   ],
   right: [],
 }
