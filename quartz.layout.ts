@@ -10,8 +10,8 @@ const explorerOptions = {
   },
   sortFn: (a: any, b: any) => {
     const priority: Record<string, number> = { src: 0, references: 1, harness: 2 }
-    const ap = priority[a.name] ?? 999
-    const bp = priority[b.name] ?? 999
+    const ap = priority[a.slugSegment] ?? 999
+    const bp = priority[b.slugSegment] ?? 999
     if (ap !== bp) return ap - bp
     if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1
     return a.displayName.localeCompare(b.displayName, undefined, {
