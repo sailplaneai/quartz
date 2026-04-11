@@ -18,6 +18,7 @@ export interface Argv {
 export type BuildTimeTrieData = QuartzPluginData & {
   slug: string
   title: string
+  shortTitle?: string
   filePath: string
 }
 
@@ -39,6 +40,7 @@ export function trieFromAllFiles(allFiles: QuartzPluginData[]): FileTrieNode<Bui
         ...file,
         slug: file.slug!,
         title: file.frontmatter.title,
+        shortTitle: file.frontmatter?.short_title as string | undefined,
         filePath: file.filePath!,
       })
     }
