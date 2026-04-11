@@ -42,5 +42,12 @@ export async function fetchCanonical(url: URL): Promise<Response> {
   // to allow the caller to read it if it's was not a redirect
   const text = await res.clone().text()
   const [_, redirect] = text.match(canonicalRegex) ?? []
-  return redirect ? fetch(`${new URL(redirect, url)}`) : res
+  if (redirect) {
+    const canonicalUrl = new URL(redirect, url)
+    const response = await fetch(`${canonicalUrl}`)
+    // Expose the resolved URL (including hash) so callers can update navigation state
+    ;(response as any).resolvedUrl = canonicalUrl
+    return response
+  }
+  return res
 }

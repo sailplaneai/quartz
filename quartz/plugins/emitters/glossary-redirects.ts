@@ -3,7 +3,7 @@ import { QuartzEmitterPlugin } from "../types"
 import { write } from "./helpers"
 import { slug as slugAnchor } from "github-slugger"
 
-const GLOSSARY_SLUG = "glossary" as FullSlug
+const GLOSSARY_SLUG = "src/glossary" as FullSlug
 
 export const GlossaryRedirects: QuartzEmitterPlugin = () => ({
   name: "GlossaryRedirects",
@@ -23,10 +23,7 @@ export const GlossaryRedirects: QuartzEmitterPlugin = () => ({
     // Parse terms with their section anchors
     const terms = extractTerms(src)
 
-    for (const { term, sectionAnchor } of terms) {
-      // Skip terms that contain backticks or special chars (inline-code conventions)
-      if (/[`<>]/.test(term)) continue
-
+    for (const { term } of terms) {
       // Slug matches what OFM + CrawlLinks produce for unresolved wikilinks:
       // [[Dell Technologies Capital]] → "Dell-Technologies-Capital" (spaces→hyphens, case preserved)
       const termSlug = term.replace(/\s/g, "-") as FullSlug
@@ -34,7 +31,9 @@ export const GlossaryRedirects: QuartzEmitterPlugin = () => ({
       // Skip if a page already exists with this filename (case-insensitive) —
       // CrawlLinks "shortest" will resolve to the real page directly
       if (existingSlugs.has(termSlug.toLowerCase())) continue
-      const anchor = sectionAnchor ? `#${slugAnchor(sectionAnchor)}` : ""
+
+      // Term-level anchor: glossary#coreweave, glossary#rob-roy
+      const anchor = `#${slugAnchor(term)}`
       const redirUrl = resolveRelative(termSlug, GLOSSARY_SLUG) + anchor
 
       yield write({
@@ -60,7 +59,6 @@ export const GlossaryRedirects: QuartzEmitterPlugin = () => ({
 
 interface GlossaryTerm {
   term: string
-  sectionAnchor: string
 }
 
 function extractTerms(markdown: string): GlossaryTerm[] {
@@ -75,13 +73,26 @@ function extractTerms(markdown: string): GlossaryTerm[] {
       continue
     }
 
-    // Extract **Bold Term** from list items
+    // Extract **Bold Term** from list items (products, companies, technical terms)
     const termMatch = line.match(/^\s*-\s+\*\*([^*]+)\*\*/)
     if (termMatch) {
-      terms.push({
-        term: termMatch[1].trim(),
-        sectionAnchor: currentSection,
-      })
+      const term = termMatch[1].trim()
+      // Skip terms with special chars (inline-code conventions like %% ... %%)
+      if (!/[`<>]/.test(term)) {
+        terms.push({ term })
+      }
+      continue
+    }
+
+    // Extract people names from the People section: "- Name (description)" format
+    if (currentSection.startsWith("People")) {
+      const peopleMatch = line.match(/^\s*-\s+([^(]+?)(?:\s*\((.+)\))?$/)
+      if (peopleMatch) {
+        const name = peopleMatch[1].trim()
+        if (name && name.length < 50) {
+          terms.push({ term: name })
+        }
+      }
     }
   }
 
