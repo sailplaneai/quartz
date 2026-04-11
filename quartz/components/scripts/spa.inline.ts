@@ -62,11 +62,14 @@ async function _navigate(url: URL, isBack: boolean = false) {
   isNavigating = true
   startLoading()
   p = p || new DOMParser()
-  const contents = await fetchCanonical(url)
+  const fetchResult = await fetchCanonical(url)
     .then((res) => {
       const contentType = res.headers.get("content-type")
       if (contentType?.startsWith("text/html")) {
-        return res.text()
+        // fetchCanonical follows <link rel="canonical"> redirects (alias and glossary pages)
+        // and exposes the resolved URL (including hash) so we can update navigation state
+        const resolvedUrl: URL | undefined = (res as any).resolvedUrl
+        return res.text().then((text) => ({ text, resolvedUrl }))
       } else {
         window.location.assign(url)
       }
@@ -75,7 +78,12 @@ async function _navigate(url: URL, isBack: boolean = false) {
       window.location.assign(url)
     })
 
-  if (!contents) return
+  if (!fetchResult) return
+  const { text: contents, resolvedUrl } = fetchResult
+
+  // Use the resolved URL for navigation state (address bar, scroll target)
+  // when fetchCanonical followed a redirect (e.g., /CoreWeave -> /src/glossary#coreweave)
+  const navUrl = resolvedUrl ?? url
 
   // notify about to nav
   const event: CustomEventMap["prenav"] = new CustomEvent("prenav", { detail: {} })
@@ -86,7 +94,7 @@ async function _navigate(url: URL, isBack: boolean = false) {
   cleanupFns.clear()
 
   const html = p.parseFromString(contents, "text/html")
-  normalizeRelativeURLs(html, url)
+  normalizeRelativeURLs(html, navUrl)
 
   let title = html.querySelector("title")?.textContent
   if (title) {
@@ -106,8 +114,8 @@ async function _navigate(url: URL, isBack: boolean = false) {
 
   // scroll into place and add history
   if (!isBack) {
-    if (url.hash) {
-      const el = document.getElementById(decodeURIComponent(url.hash.substring(1)))
+    if (navUrl.hash) {
+      const el = document.getElementById(decodeURIComponent(navUrl.hash.substring(1)))
       el?.scrollIntoView()
     } else {
       window.scrollTo({ top: 0 })
@@ -123,7 +131,7 @@ async function _navigate(url: URL, isBack: boolean = false) {
   // delay setting the url until now
   // at this point everything is loaded so changing the url should resolve to the correct addresses
   if (!isBack) {
-    history.pushState({}, "", url)
+    history.pushState({}, "", navUrl)
   }
 
   notifyNav(getFullSlug(window))
