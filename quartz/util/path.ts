@@ -272,6 +272,41 @@ export function transformLink(src: FullSlug, target: string, opts: TransformOpti
         return (resolveRelative(src, sorted[0]) + targetAnchor) as RelativeURL
       }
 
+      // zero filename matches: try folder-index fallback.
+      // A target like "docs" should match slug "harness/docs/index" when the source
+      // file is inside "harness/". This handles _index.md links to sibling directories.
+      if (matchingFileNames.length === 0) {
+        const folderSuffix = targetLower + "/index"
+        const folderMatches = opts.allSlugs.filter((slug) => {
+          const s = slug.toLowerCase()
+          return s === folderSuffix || s.endsWith("/" + folderSuffix)
+        })
+
+        if (folderMatches.length === 1) {
+          return (resolveRelative(src, folderMatches[0]) + targetAnchor) as RelativeURL
+        }
+
+        if (folderMatches.length > 1) {
+          const srcParts = src.split("/")
+          const sorted = [...folderMatches].sort((a, b) => {
+            const aParts = a.split("/")
+            const bParts = b.split("/")
+            let aCommon = 0
+            let bCommon = 0
+            for (let i = 0; i < Math.min(srcParts.length, aParts.length); i++) {
+              if (srcParts[i] === aParts[i]) aCommon++
+              else break
+            }
+            for (let i = 0; i < Math.min(srcParts.length, bParts.length); i++) {
+              if (srcParts[i] === bParts[i]) bCommon++
+              else break
+            }
+            return bCommon - aCommon
+          })
+          return (resolveRelative(src, sorted[0]) + targetAnchor) as RelativeURL
+        }
+      }
+
       // zero matches: if target has path separators, the author wrote an explicit
       // relative path — respect it instead of constructing a broken absolute path
       if (targetCanonical.includes("/")) {
