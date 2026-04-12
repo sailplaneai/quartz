@@ -37,6 +37,34 @@ export function getStaticResourcesFromPlugins(ctx: BuildCtx) {
         socket.addEventListener('message', () => document.location.reload(true))
       `,
     })
+  } else {
+    // For static deployments: poll /.build manifest for content updates.
+    // On page load, capture the current build ID. On tab focus, check if
+    // it changed. If so, reload. 404 (no manifest) silently no-ops.
+    staticResources.js.push({
+      loadTime: "afterDOMReady",
+      contentType: "inline",
+      script: `
+        (function() {
+          var buildId;
+          function check() {
+            fetch('/.build', { cache: 'no-store' })
+              .then(function(r) { return r.ok ? r.text() : null; })
+              .then(function(id) {
+                if (!id) return;
+                id = id.trim();
+                if (!buildId) buildId = id;
+                else if (id !== buildId) document.location.reload(true);
+              })
+              .catch(function() {});
+          }
+          check();
+          document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') check();
+          });
+        })();
+      `,
+    })
   }
 
   return staticResources
