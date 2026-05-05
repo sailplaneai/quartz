@@ -83,16 +83,26 @@ button,
   // in the graph's data processing.
 }
 
-// Confidential content blocks — subtle visual indicator
-// Matches %% ... %% delimiters in markdown
+// Confidential content blocks — visual indicator that brackets %% ... %% ranges
+// on both sides so readers can see where confidentiality starts AND ends.
 .confidential {
-  background: oklch(0.97 0.02 85 / 0.3);
-  border-left: 3px solid oklch(0.75 0.15 85);
+  background: oklch(0.95 0.08 85 / 0.4);
+  border-left: 3px solid oklch(0.72 0.18 85);
+  border-right: 3px solid oklch(0.72 0.18 85);
   padding: 0.5rem 1rem;
   border-radius: var(--radius);
 }
 
+// Inline spans need tighter padding so they don't overlap adjacent text lines
+// when wrapped. Block divs keep the larger padding from the base rule.
+// Margin gives the brackets breathing room from adjacent text on both sides.
+span.confidential {
+  padding: 0.1rem 0.4rem;
+  margin: 0 0.4em;
+}
+
 [saved-theme="dark"] .confidential {
-  background: oklch(0.269 0.02 85 / 0.3);
-  border-left-color: oklch(0.6 0.15 85);
+  background: oklch(0.32 0.08 85 / 0.45);
+  border-left-color: oklch(0.65 0.18 85);
+  border-right-color: oklch(0.65 0.18 85);
 }
