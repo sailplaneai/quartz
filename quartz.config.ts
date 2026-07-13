@@ -66,7 +66,6 @@ const config: QuartzConfig = {
         },
         keepBackground: false,
       }),
-      Plugin.StripFoamLinks(),
       Plugin.StripDuplicateTitle(),
       Plugin.Confidential(),
       Plugin.ObsidianFlavoredMarkdown({ enableInHtmlEmbed: false, comments: false }),
